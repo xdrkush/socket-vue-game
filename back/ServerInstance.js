@@ -1,11 +1,19 @@
-import express from 'express'
-import cors from 'cors'
-import path from 'path'
-import http from 'http'
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import http from 'http';
 import { Server } from "socket.io";
 import SocketInstance from './SocketInstance.js';
-const app = express()
+import session from "express-session";
+import sharedsession from 'express-socket.io-session';
 
+const app = express();
+
+const sess = session({
+    secret: "my-secret",
+    resave: true,
+    saveUninitialized: true
+})
 export default class ServerInstance extends SocketInstance {
     constructor() {
         super();
@@ -42,6 +50,10 @@ export default class ServerInstance extends SocketInstance {
             credentials: true
         }))
 
+        this.app.use(sess)
+
+        this.io.use(sharedsession(sess));
+        
         // app.use(express.static(path.join('dist')));
 
         // app.get('/', (req, res) => {

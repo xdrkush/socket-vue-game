@@ -1,13 +1,24 @@
 <template>
   <div>
-    <p>{{ store }}</p>
+    <p>currentPlayer: {{ store.getCurrentPlayer }}</p>
+    <p>currentRoom: {{ store.getCurrentRoom }}</p>
 
-    <Dashboard
-      :messages="messages"
-      :currentPlayer="currentPlayer"
-      :users="users"
-      :games="games"
-    />
+    <div>
+      <p>users</p>
+      <ul v-if="store.getCurrentRoom.users">
+        <li :key="u" v-for="u in store.getCurrentRoom.users">
+          {{ u }}
+        </li>
+      </ul>
+      <p>players</p>
+      <ul v-if="store.getCurrentRoom.players">
+        <li :key="u" v-for="u in store.getCurrentRoom.players">
+          {{ u }}
+        </li>
+      </ul>
+    </div>
+
+    <Dashboard />
 
     <!-- Page (Body) -->
     <div>
@@ -17,12 +28,11 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import Dashboard from "../components/Dashboard";
-// import Socket from "../boot/socket.io";
-import {useStore} from "../stores/global.store"
-
-const staticPages = [{ name: "puissance-4", path: "p4" }];
+import { useStore } from "../stores/global.store";
+import S from "../boot/socket.io"
 
 export default defineComponent({
   name: "MainLayout",
@@ -30,20 +40,18 @@ export default defineComponent({
   components: { Dashboard },
 
   setup() {
-    const pages = ref(staticPages);
-    const games = ref(staticPages);
-    const currentPlayer = ref("");
-    const users = ref([]);
-    const messages = ref([]);
     const store = useStore();
+    const route = useRoute();
+    const router = useRouter();
 
+    console.log("GameLayout", route.params.game, route.params.id, route.params.name);
+    // store.loadRoom(router.fullPath);
+
+    if (!store.getLoggedIn) router.push('/')
+    else S.socket.emit("getSyncRoom", { user: store.getCurrentPlayer, room: `${route.params.game}/${route.params.id}/${route.params.name}` });
+    
     return {
       store,
-      messages,
-      games,
-      users,
-      currentPlayer,
-      pages,
     };
   },
 });

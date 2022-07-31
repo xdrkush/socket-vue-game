@@ -8,19 +8,20 @@ import SocketioService from './boot/socket.io'
 import Notifications from '@kyvg/vue3-notification'
 
 const pinia = createPinia()
-pinia.use(({store}) => {
-    store.$router = markRaw(router)
-})
 
 const app = createApp(App)
 
 const socket = SocketioService.setupSocketConnection();
 
-console.log('main', socket)
+pinia.use(({store}) => {
+    store.$router = markRaw(router)
+})
+
+// console.log('main', socket)
 
 app
+    .use(router)
     .use(pinia)
     .use(socket)
-    .use(router)
     .use(Notifications)
     .mount('#app')

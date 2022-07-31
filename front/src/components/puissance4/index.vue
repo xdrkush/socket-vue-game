@@ -12,21 +12,18 @@
 <script>
 import { useStore } from "../../stores/global.store";
 import Socket from "../../boot/socket.io";
-import { useRouter } from "vue-router";
 
 export default {
   name: "Puissance4Home",
   setup() {
     const store = useStore();
-    const router = useRouter();
 
     return {
       startGame() {
-        Socket.socket.emit("startGame", {
+        Socket.socket.emit("createGame", {
           game: "p4",
-          author: store.getCurrentPlayer.id,
+          author: store.getCurrentPlayer,
         });
-        router.push(`/game/p4/${store.currentPlayer.id}`);
       },
     };
   },

@@ -4,28 +4,51 @@
       style="display: flex; justify-content: space-around; align-items: center"
     >
       <div class="yellowBall" />
-      <div v-if="store.getCurrentRoom.players">
-        <!-- <h2 v-if="store.getCurrentRoom.data.players.player1">{{ store.getCurrentRoom.data.players.player1.point }}</h2> -->
+      <div>
         <h6>Player 1</h6>
-        <h5 v-if="store.getCurrentRoom.players[0]">{{ store.getCurrentRoom.players[0] }}</h5>
+        <h5 v-if="store.getCurrentRoom.players.length > 0">
+          {{ store.getCurrentRoom.players[0].username }}
+        </h5>
       </div>
       <div>
-        <h3>Welcome to Puissance 4</h3>
         <h5 v-if="store.currentRoom.data.message">
           {{ store.currentRoom.data.message }}
         </h5>
       </div>
       <div>
-        <!-- <h2 v-if="store.getCurrentRoom.data.players.player2" >{{ store.getCurrentRoom.data.players.player2.point }}</h2> -->
         <h6>Player 2</h6>
-        <h5 v-if="store.getCurrentRoom.players[1]">
-          {{ store.getCurrentRoom.players[1] || "en attente" }}
+        <h5 v-if="store.getCurrentRoom.players.length > 1">
+          {{ store.getCurrentRoom.players[1].username }}
         </h5>
+        <h5 v-else>en attente</h5>
+        <div
+          v-if="
+            store.getCurrentRoom.author.sessionID ===
+            store.getCurrentPlayer.sessionID
+          "
+        >
+          <select v-model="choosePlayer" placeholder="Choisir un joueur">
+            <option
+              :value="u.sessionID"
+              :key="u.sessionID"
+              v-for="u in store.getCurrentRoom.users"
+            >
+              {{ u.username }}
+            </option>
+          </select>
+          <button
+            v-if="choosePlayer"
+            @click="
+              () => selectPlayer(choosePlayer, store.getCurrentRoom)
+            "
+          >
+            OK
+          </button>
+          <p v-else>choisissez un joueur</p>
+        </div>
       </div>
       <div class="redBall" />
     </div>
-
-    <p>{{ store.getCurrentRoom }}</p>
 
     <div style="display: flex; justify-content: space-around">
       <button v-if="!store.currentRoom.data.loadGame" @click="startGame()">
@@ -69,6 +92,7 @@ import checkWin from "./compute";
 import { useStore } from "../../stores/global.store";
 import Socket from "../../boot/socket.io";
 import { useRouter } from "vue-router";
+import { ref } from "vue";
 
 const rows = 6;
 const cols = 7;
@@ -82,12 +106,21 @@ export default {
   setup() {
     const store = useStore();
     const router = useRouter();
+    const choosePlayer = ref("");
     return {
       store,
+      choosePlayer,
+      selectPlayer(id, room) {
+        console.log('selectPlayer', id, room)
+        Socket.socket.emit("selectPlayer", {
+          choosePlayer: id,
+          room,
+        });
+      },
       // Function
       startGame() {
         console.log("startGame Go !");
-        Socket.socket.emit("go", {
+        Socket.socket.emit("startGame", {
           ...store.getCurrentRoom,
           data: {
             ...store.getCurrentRoom.data,
@@ -98,15 +131,15 @@ export default {
             gameOver: false,
             currentPlayer: 1,
             players: {
-              player1: { id: 1, name: "player1", color: "yellow", point: 0 },
-              player2: { id: 2, name: "player2", color: "red", point: 0 },
+              player1: { ...store.getCurrentRoom.players[0], id: 1, color: "yellow", point: 0 },
+              player2: { ...store.getCurrentRoom.players[1], id: 2, color: "red", point: 0 },
             },
           },
         });
       },
       stopGame() {
         Socket.socket.emit("stop", store.getCurrentRoom);
-        router.push("/" + store.getCurrentRoom.status)
+        router.push("/" + store.getCurrentRoom.status);
       },
       refreshGame() {
         console.log("refresh game");
@@ -134,7 +167,10 @@ export default {
         return 5;
       },
       action(r, c) {
-        if (!store.getCurrentRoom.data.isActive) {
+        if (store.getCurrentPlayer.sessionID !== store.getCurrentRoom.data.players[`player${Number(store.getCurrentRoom.data.currentPlayer)}`].sessionID) {
+          console.log("Ce n'est pas à vous de jouer")
+        }
+        else if (!store.getCurrentRoom.data.isActive) {
           store.getCurrentRoom.data.message = `Le joueurs ${store.getCurrentRoom.data.currentPlayer} à gagner, vous devez recommencer une partie !`;
         } else {
           let checkRow = this.checkRow(c);

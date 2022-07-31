@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-const URL = "http://192.168.1.69:3000"
+const URL = "http://192.168.1.14:3000"
 
 class SocketioService {
     socket;

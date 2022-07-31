@@ -25,7 +25,39 @@
         border: solid 1px lightgreen;
       "
     >
-      {{ store.getCurrentPlayer.id }}
+      <p>
+        {{ store.getCurrentPlayer.username }}
+      </p>
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        "
+      >
+        <p v-if="!editName">
+          {{ store.getCurrentPlayer.username }}
+        </p>
+        <div v-else>
+          <input v-model="store.getCurrentPlayer.username" type="text" />
+        </div>
+
+        <button
+          v-if="editName"
+          @click="
+            () => {
+              editName = !editName;
+              store.getCurrentPlayer.username = oldUser.username;
+            }
+          "
+          style="background-color: lightcoral"
+        >
+          X
+        </button>
+
+        <button v-if="!editName" @click="editName = !editname">edit</button>
+        <button v-else @click="() => editProfile()">confirmer</button>
+      </div>
     </div>
 
     <!-- Games -->
@@ -53,30 +85,35 @@
       >
         <p v-if="store.getGames.length > 0">Jeux disponible</p>
         <div :key="game.name + index" v-for="(game, index) in store.games">
-          <button @click="() => homeGame(game)">
-            {{ game.name }}
-          </button>
+          <router-link :to="`/${game.path}`">
+            <button>
+              {{ game.name }}
+            </button>
+          </router-link>
         </div>
         <p v-if="store.getRooms.length > 0">Rejoindre une partie</p>
-        <div :key="room + index" v-for="(room, index) in store.rooms">
-          <button @click="() => joinGame(room)">
-            {{ room.status }} - {{ room.author }} : [
-            {{ room.players.length }} / {{ room.limitPlayers }} ] :: {{ room.users.length }}
-          </button>
+        <div :key="index" v-for="(room, index) in store.rooms">
+          <router-link :to="`/game/${room.name}`">
+            <button v-if="room">
+              {{ room.status }} - {{ room.author.username }} : [
+              {{ room.players.length }} / {{ room.limitPlayers }} ] ::
+              {{ room.users.length }}
+            </button>
+          </router-link>
         </div>
-        <p>Jouer à</p>
+        <!-- <p>Jouer à</p>
         <select v-model="game" placeholder="Choisir un jeux">
-          <option :key="game" v-for="game in store.games">
+          <option :key="game" v-for="game in store.getGames">
             {{ game.name }}
           </option>
         </select>
         <p>Avec</p>
-        <select v-model="user" placeholder="Users en ligne">
-          <option :key="user" v-for="user in store.users" :value="user">
+        <select v-if="store.users" v-model="user" placeholder="Users en ligne">
+          <option :key="user" v-for="user in store.getUsers" :value="user">
             {{ user }}
           </option>
         </select>
-        <button type="submit">inviter</button>
+        <button type="submit">inviter</button> -->
       </form>
     </div>
 
@@ -103,7 +140,7 @@
             width: 100%;
             display: flex;
             justify-content: ${
-              m.author === store.getCurrentPlayer.id ? 'end' : 'start'
+              m.author === store.getCurrentPlayer.username ? 'end' : 'start'
             };
           `"
           >
@@ -113,24 +150,26 @@
             width: 80%;
             background-color: lightgreen;
             color: ${
-              m.author === store.getCurrentPlayer.id
+              m.author === store.getCurrentPlayer.username
                 ? 'darklategrey'
                 : 'darklategrey'
             };
             border-radius: ${
-              m.author === store.getCurrentPlayer.id
+              m.author === store.getCurrentPlayer.username
                 ? '10px 10px 0 10px'
                 : '10px 10px 10px 0'
             };
             text-align: ${
-              m.author === store.getCurrentPlayer.id ? 'right' : 'left'
+              m.author === store.getCurrentPlayer.username ? 'right' : 'left'
             };
           `"
             >
               <p>
                 <strong>
                   {{
-                    m.author === store.getCurrentPlayer.id ? "Moi" : m.author
+                    m.author === store.getCurrentPlayer.username
+                      ? "Moi"
+                      : m.author
                   }}:
                 </strong>
               </p>
@@ -155,6 +194,7 @@
       </form>
     </div>
 
+    <!-- Button bottom -->
     <div
       style="
         display: flex;
@@ -205,6 +245,7 @@
       </button>
     </div>
 
+    <!-- Return to home -->
     <p
       v-if="dashboard"
       style="
@@ -220,27 +261,32 @@
 
 <script>
 import { ref } from "vue";
-import Socket from "../../boot/socket.io";
+import S from "../../boot/socket.io";
 import { useStore } from "../../stores/global.store";
-import { useRouter } from "vue-router";
+// import { useRouter } from "vue-router";
 
 export default {
   name: "Chat",
 
   setup() {
+    const store = useStore();
     const dashboard = ref(false);
     const chat = ref(false);
     const game = ref(false);
     const account = ref(false);
+    const editName = ref(false);
     const text = ref("");
-    const store = useStore();
-    const router = useRouter();
+    const user = ref({ ...store.getCurrentPlayer });
+    const oldUser = { ...store.getCurrentPlayer };
 
     return {
       store,
+      oldUser,
+      user,
       dashboard,
       chat,
       game,
+      editName,
       account,
       text,
       sendMessage(e) {
@@ -248,24 +294,26 @@ export default {
         console.log("sendMessage", store.getCurrentPlayer, text.value);
 
         if (text.value.length <= 0) return;
-        Socket.socket.emit("sendMessage", {
-          author: store.getCurrentPlayer.id,
+        S.socket.emit("sendMessage", {
+          author: store.getCurrentPlayer.username,
+          authorID: store.getCurrentPlayer.sessionID,
           text: text.value,
         });
         text.value = "";
       },
-      joinGame(room) {
-        console.log('joinGame', room)
-        Socket.socket.emit("joinGame", { user: store.getCurrentPlayer, room });
-        router.push(`/game/p4/${room.author}`);
-      },
-      homeGame(game) {
-        console.log('homeGame', game)
-        router.push(`/${game.path}`);
-      },
+      // joinRoom(room) {
+      //   console.log("joinRoom", room);
+      //   S.socket.emit("joinRoom", { user: store.getCurrentPlayer, room });
+      // },
       toggleChat() {
         if (!chat.value) chat.value = true;
         else chat.value = false;
+      },
+      editProfile() {
+        console.log("editProfile", store.getCurrentPlayer);
+        S.socket.emit("editProfile", {
+          ...store.getCurrentPlayer,
+        });
       },
     };
   },

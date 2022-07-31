@@ -17,27 +17,33 @@
       <h1 style="margin-left: 20px">
         <router-link to="/">Kush-Land</router-link>
       </h1>
-      <button
-        style="
-          background-color: lightseagreen;
-          color: white;
-          margin-right: 15px;
-          padding: 7px;
-          border-radius: 15px;
-          border: solid 1px darkslategrey;
-          box-shadow: 0 0 3px black;
-          text-shadow: 0 0 5px black;
-        "
-        @click="connect()"
-      >
-        me connecter
-      </button>
+
+      <!-- <div v-if="!store.getCurrentPlayer.auth">
+        <button
+          style="
+            background-color: lightseagreen;
+            color: white;
+            margin-right: 15px;
+            padding: 7px;
+            border-radius: 15px;
+            border: solid 1px darkslategrey;
+            box-shadow: 0 0 3px black;
+            text-shadow: 0 0 5px black;
+          "
+          @click="connect()"
+        >
+          me connecter
+        </button>
+      </div> -->
     </nav>
 
-    <p>{{ store.getCurrentPlayer.id }}</p>
-    <p>{{ store }}</p>
+    <p>currentUser: {{ store.getCurrentPlayer }}</p>
+    <p>currentRoom: {{ store.getCurrentRoom }}</p>
+    <p>sessions: {{ store.getSessions }}</p>
+    <p>rooms: {{ store.getRooms }}</p>
+    <!-- <p>{{ store }}</p> -->
 
-    <Dashboard />
+    <Dashboard :user="store.getCurrentUser" />
 
     <!-- Page (Body) -->
     <div>
