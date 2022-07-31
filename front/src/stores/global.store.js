@@ -118,7 +118,7 @@ export const useStore = defineStore("main", {
                 console.log("userDisconnected:", data);
                 this.users = data.users
                 this.rooms = data.rooms
-                notify(data.user.username + ": c'est déconnecter");
+                notify(data.user.name + ": c'est déconnecter");
             });
         },
         getSyncMessage() {

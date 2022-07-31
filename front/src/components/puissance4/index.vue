@@ -1,10 +1,10 @@
 <template>
-  <div class="col bg-secondary" style="min-height: 94vh">
+  <div class="col" style="min-height: 94vh">
     <div>
       <h3>Welcome to puissance 4</h3>
     </div>
     <div style="display: flex; justify-content: space-around">
-      <button @click="startGame()">Start game</button>
+      <button @click="createGame()">Start game</button>
     </div>
   </div>
 </template>
@@ -19,7 +19,7 @@ export default {
     const store = useStore();
 
     return {
-      startGame() {
+      createGame() {
         Socket.socket.emit("createGame", {
           game: "p4",
           author: store.getCurrentPlayer,

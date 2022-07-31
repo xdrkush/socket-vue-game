@@ -1025,10 +1025,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@kyvg/vue3-notification@^2.3.5":
-  version "2.3.5"
-  resolved "https://registry.yarnpkg.com/@kyvg/vue3-notification/-/vue3-notification-2.3.5.tgz#b4aa302a839b52d62e25c644827fa16fd7bbc308"
-  integrity sha512-OsRDjCGLXOfUZu9dEyxWJuXkCrpQT7o0ZgdFeKYkcqG9MWY544DTZ7hpPIDFoSI9DlK/GS2NSwAb+/R7DABhzQ==
+"@kyvg/vue3-notification@^2.3.6":
+  version "2.3.6"
+  resolved "https://registry.yarnpkg.com/@kyvg/vue3-notification/-/vue3-notification-2.3.6.tgz#130f9b69bbe30ebe582ab4d57510f7dee784742b"
+  integrity sha512-uQcVOrJIyEYoXLctgJqlj2YPhCaZ80mXgF1xgQZwshqeneNgG08WE8Iw9U3IH8OgUITkRGII0YopdXwLeOXb3w==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -6346,6 +6346,11 @@ parseurl@~1.3.2, parseurl@~1.3.3:
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/parseurl/-/parseurl-1.3.3.tgz#9da19e7bee8d12dff0513ed5b76957793bc2e8d4"
   integrity sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==
+
+party-js@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/party-js/-/party-js-2.2.0.tgz#3340026971c9e62fd34db102daaa645fbc9130b8"
+  integrity sha512-50hGuALCpvDTrQLPQ1fgUgxKIWAH28ShVkmeK/3zhO0YJyCqkhrZhQEkWPxDYLvbFJ7YAXyROmFEu35gKpZLtQ==
 
 pascalcase@^0.1.1:
   version "0.1.1"
