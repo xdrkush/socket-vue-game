@@ -101,13 +101,6 @@ export default {
         });
         text.value = "";
       },
-      selectPlayer(id, room) {
-        console.log("selectPlayer", id, room);
-        S.socket.emit("selectPlayer", {
-          choosePlayer: id,
-          room,
-        });
-      },
     };
   },
 };

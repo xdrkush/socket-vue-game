@@ -47,6 +47,14 @@ export const useStore = defineStore("main", {
         },
         getSync() {
             // Load page
+
+            S.socket.on("flash", (data) => {
+                this.flash = data.message;
+                notify({
+                    title: data.message
+                });
+            });
+
             S.socket.on("getSync", (data) => {
                 console.log('getSync', data)
                 this.messages = data.messages;
@@ -95,6 +103,9 @@ export const useStore = defineStore("main", {
                 this.rooms = data.rooms;
                 this.currentRoom = data.room;
                 this.$router.push('/')
+                notify({
+                    title: `${this.getCurrentRoom.author.username} à mis fin à la partie 🎉`,
+                });
             });
 
             // S.socket.on("joinRoom", (data) => {

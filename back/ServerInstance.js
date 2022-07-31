@@ -6,9 +6,11 @@ import { Server } from "socket.io";
 import SocketInstance from './SocketInstance.js';
 import session from "express-session";
 import sharedsession from 'express-socket.io-session';
+import dotenv from 'dotenv';
+dotenv.config()
 
 const app = express();
-
+const { PORT } = process.env;
 const sess = session({
     secret: "my-secret",
     resave: true,
@@ -20,6 +22,7 @@ export default class ServerInstance extends SocketInstance {
         this.app = app;
         this.server = http.createServer(app);
         this.io = new Server(this.server, {
+            path: '/sosocket',
             cors: {
                 origin: "http://0.0.0.0",
                 methods: ["GET", "POST"],
@@ -54,14 +57,14 @@ export default class ServerInstance extends SocketInstance {
 
         this.io.use(sharedsession(sess));
         
-        // app.use(express.static(path.join('dist')));
+        app.use(express.static(path.join('dist')));
 
-        // app.get('/', (req, res) => {
-        //   res.sendFile('./dist/index.html');
-        // });
+        app.get('/', (req, res) => {
+          res.sendFile('./dist/index.html');
+        });
 
-        this.server.listen(3000, () => {
-            console.log('listening on *:3000');
+        this.server.listen(PORT, () => {
+            console.log('BACK :: [SOCKET.IO] run on :', PORT);
         });
 
     }

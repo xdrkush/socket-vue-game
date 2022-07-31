@@ -120,7 +120,7 @@
     <div
       v-if="
         store.getCurrentPlayer.sessionID ===
-          store.getCurrentRoom.author.sessionID &&
+        store.getCurrentRoom.author.sessionID &&
         store.getCurrentRoom.players &&
         store.getCurrentRoom.players.length >= store.getCurrentRoom.limitPlayers
       "
@@ -165,7 +165,7 @@ import { useStore } from "../../stores/global.store";
 import Socket from "../../boot/socket.io";
 import { useRouter, useRoute } from "vue-router";
 import { notify } from "@kyvg/vue3-notification";
-import party from "party-js";
+// import party from "party-js";
 
 const rows = 6;
 const cols = 7;
@@ -218,14 +218,14 @@ export default {
       },
       refreshGame() {
         console.log("refresh game");
-        party.confetti(this, {
-          count: party.variation.range(20, 40),
-        });
+        // party.confetti(this, {
+        //   count: party.variation.range(20, 40),
+        // });
         Socket.socket.emit("refresh", {
           ...store.getCurrentRoom,
           data: {
             ...store.getCurrentRoom.data,
-            message: "Vous recommencer une nouvelle partie !",
+            message: "Vous recommencer une nouvelle partie 🎉 !",
             loadGame: true,
             isActive: true,
             board: Array.from({ length: rows }, () =>
@@ -268,9 +268,9 @@ export default {
             console.log(
               `Le joueurs ${store.getCurrentRoom.data.currentPlayer} à gagner`
             );
-            notify(
-              `Le joueurs ${store.getCurrentRoom.data.currentPlayer} à gagner`
-            );
+            Socket.socket.emit("winner", {
+              message: `Le joueurs ${store.getCurrentRoom.data.currentPlayer} à gagner 🎉 !`,
+            });
             store.getCurrentRoom.data.players[
               "player" + store.getCurrentRoom.data.currentPlayer
             ].point++;
@@ -297,7 +297,9 @@ export default {
       },
       copyToClipPart() {
         navigator.clipboard.writeText(window.location.href);
-        notify(route.fullPath + " copied");
+        notify({
+          title: route.fullPath + " copied",
+        });
       },
       togglePlayer() {
         if (store.getCurrentRoom.data.currentPlayer === 1)

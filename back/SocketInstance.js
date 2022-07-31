@@ -14,7 +14,7 @@ export default class SocketInstance {
     runSocket() {
         this.io.use(async (socket, next) => {
             const sessionID = socket.handshake.auth.sessionID;
-            console.log('session')
+            // console.log('session')
             if (sessionID) {
                 const session = this.sessions.find(sess => {
                     if (sess.sessionID === sessionID) return true
@@ -31,7 +31,7 @@ export default class SocketInstance {
             if (!username) {
                 return next(new Error("invalid username"));
             }
-            // console.log('handshake', socket.handshake)
+            console.log('handshake', socket.handshake)
             socket.sessionID = randomId();
             socket.userID = randomId();
             socket.username = username;
@@ -40,7 +40,7 @@ export default class SocketInstance {
         });
 
         this.io.on('connection', (socket) => {
-            console.log('connection socket', socket.id, this.rooms)
+            // console.log('connection socket', socket.id, this.rooms)
 
             // emit session details
             socket.emit("session", {
@@ -69,14 +69,14 @@ export default class SocketInstance {
             // socket.on("login", function (userdata) {
             //     socket.handshake.session.userdata = userdata;
             //     socket.handshake.session.save();
-            //     console.log('session on')
+                // console.log('session on')
             // });
 
             // socket.on("logout", function (userdata) {
             //     if (socket.handshake.session.userdata) {
             //         delete socket.handshake.session.userdata;
             //         socket.handshake.session.save();
-            //         console.log('session off')
+                    // console.log('session off')
             //     }
             // });
 
@@ -92,59 +92,68 @@ export default class SocketInstance {
                 let room = this.rooms.find(r => {
                     if (r.name === data.room) return true
                 })
-                console.log('getSyncRoom', room, data)
+                // console.log('getSyncRoom', room, data)
 
                 let userExist = room.users.find((user) => {
                     if (user.sessionID === data.user.sessionID) return true
                 })
                 if (!userExist) {
-                    console.log('getSyncRoom, !userexist')
+                    // console.log('getSyncRoom, !userexist')
                     room.users = [...room.users, data.user]
                 }
 
                 this.rooms = [...this.rooms.map((r) => {
-                    console.log('loop', r.name)
+                    // console.log('loop', r.name)
                     if (r.name === data.room) {
-                        console.log('match room')
+                        // console.log('match room')
                         r.users = room.users;
                         r.players = room.players;
                         return room
                     } else return r
                 })]
 
-                console.log('getSyncRoom2', room)
-
                 this.io.emit("syncRooms", { rooms: this.rooms })
                 this.io.to(`${room.name}`).emit('syncRoom', {
                     room
                 })
+                this.io.to(`${room.name}`).emit('flash', {
+                    message: "Un visiteurs venu d'ailleurs, "
+                })
             })
 
-            // Load global
             socket.on('editProfile', (data) => {
-                console.log('editProfile', data, this.users)
+                // console.log('editProfile', data, this.users)
                 this.sessions = [...this.sessions.map((sess, index) => {
-                    console.log('loop', sess, data)
+                    // console.log('loop', sess, data)
                     if (sess.sessionID === data.sessionID) {
-                        console.log('match')
+                        // console.log('match')
                         sess.username = data.username;
                         return sess
                     } else return sess
                 })]
                 this.io.emit('syncEditProfile', { user: data, sessions: this.sessions })
-                console.log('editProfile2', this.sessions)
+                this.io.emit('flash', {
+                    message: `$${data.username} à éditer son profil`
+                })
             })
 
             socket.on('sendMessage', (data) => {
-                console.log('sendMessage', this.messages)
+                // console.log('sendMessage', this.messages)
                 this.setMessages(data)
                 this.io.emit('syncMessage', data)
+                this.io.emit('flash', {
+                    message: "nouveau message #global"
+                })
             });
+
             socket.on('sendMessageRoom', (data) => {
-                console.log('sendMessage', this.messages)
+                // console.log('sendMessage', this.messages)
                 const room = this.setRoom(data.room)
                 this.io.to(`${room.name}`).emit('syncRoom', {
                     room
+                })
+                this.io.to(`${data.room.name}`).emit('flash', {
+                    message: "nouveau message #" + data.room.name
                 })
             });
 
@@ -152,7 +161,7 @@ export default class SocketInstance {
                 const user = this.sessions.find(u => {
                     if (u.sessionID === data.choosePlayer) return true;
                 })
-                console.log('user selected', data, user)
+                // console.log('user selected', data, user)
 
                 this.rooms = this.rooms.map(r => {
                     if (r.name === data.room.name) return {
@@ -162,20 +171,23 @@ export default class SocketInstance {
                 })
 
                 const room = this.rooms.find(r => {
-                    console.log('FIND::', r, data.room.name)
+                    // console.log('FIND::', r, data.room.name)
                     if (String(r.name) === String(data.room.name)) return true;
                 })
 
-                console.log('SEND SELECTPLAYER', this.rooms, room)
+                // console.log('SEND SELECTPLAYER', this.rooms, room)
 
                 this.io.emit('syncRooms', { rooms: this.rooms })
                 this.io.to(`${data.room.name}`).emit('syncRoom', {
                     room
                 })
+                this.io.to(`${data.room.name}`).emit('flash', {
+                    message: user.username + " est le player 2 !"
+                })
             });
 
             socket.on('createGame', (data) => {
-                console.log('createGame', data)
+                // console.log('createGame', data)
                 const room = {
                     name: `${data.game}/${data.author.userID}/${data.author.username}`,
                     author: data.author,
@@ -198,10 +210,13 @@ export default class SocketInstance {
                 this.io.to(`${room.name}`).emit('createGame', {
                     room, rooms: this.rooms
                 })
+                this.io.emit('flash', {
+                    message: "Nouvelle partie créé 🎉 !",
+                })
             });
 
             socket.on('startGame', (data) => {
-                console.log('startGame', data)
+                // console.log('startGame', data)
                 this.rooms = [...this.rooms.map((room, index) => {
                     if (room.name === data.name) return { ...room, ...data }
                     else return
@@ -209,36 +224,38 @@ export default class SocketInstance {
 
                 const room = this.getRoomByName(data.name)
 
-                console.log('startGame', room, this.rooms)
+                // console.log('startGame', room, this.rooms)
 
                 this.io.emit("syncRooms", { rooms: this.rooms })
                 this.io.to(`${data.name}`).emit('syncRoom', {
                     room,
+                })
+                this.io.to(`${data.name}`).emit('flash', {
+                    message: "La partie commence 🎉 !",
                 })
             })
 
             socket.on('refresh', (data) => {
-                console.log('refresh', data)
-
                 const room = this.setRoom(data)
-
-                // this.rooms = [...this.rooms.map((room, index) => {
-                //     if (room.name === data.name) return data
-                //     else return
-                // })]
 
                 this.io.emit("syncRooms", { rooms: this.rooms })
                 this.io.to(`${data.name}`).emit('syncRoom', {
                     room,
                 })
+                this.io.to(`${data.name}`).emit('flash', {
+                    message: "partie relancer 🎉 !",
+                })
             })
 
             socket.on('stop', (data) => {
-                console.log('stop', data)
+                // console.log('stop', data)
                 const rooms = this.deleteRoom(data)
 
                 this.io.to(`${data.name}`).emit('stop', {
                     room: {}, rooms: this.rooms
+                })
+                this.io.to(`${data.name}`).emit('flash', {
+                    message: "l'hote à quitter !",
                 })
             })
 
@@ -248,6 +265,13 @@ export default class SocketInstance {
                 this.io.emit('syncRoooms', { rooms: this.rooms })
                 this.io.to(`${data.name}`).emit('action', {
                     room
+                })
+            })
+            
+            socket.on('winner', (data) => {
+                console.log('WINNER::', data)
+                this.io.to(`${data.name}`).emit('flash', {
+                    message: data.message,
                 })
             })
 
@@ -267,8 +291,8 @@ export default class SocketInstance {
 
             // Error
             socket.on("error", (err) => {
-                console.log("An error occurred!");
-                console.log(err);
+                // console.log("An error occurred!");
+                // console.log(err);
             });
         })
 

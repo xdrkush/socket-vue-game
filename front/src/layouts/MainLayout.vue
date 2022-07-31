@@ -38,9 +38,9 @@
     </nav>
 
     <p>currentUser: {{ store.getCurrentPlayer }}</p>
-    <p>currentRoom: {{ store.getCurrentRoom }}</p>
-    <p>sessions: {{ store.getSessions }}</p>
-    <p>rooms: {{ store.getRooms }}</p>
+    <!-- <p>currentRoom: {{ store.getCurrentRoom }}</p> -->
+    <!-- <p>sessions: {{ store.getSessions }}</p> -->
+    <!-- <p>rooms: {{ store.getRooms }}</p> -->
     <!-- <p>{{ store }}</p> -->
 
     <Dashboard :user="store.getCurrentUser" />

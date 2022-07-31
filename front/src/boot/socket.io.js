@@ -1,13 +1,14 @@
 import { io } from 'socket.io-client';
 
-const URL = "http://192.168.1.14:3000"
-
+console.log('socket.io', process.env)
+const { VUE_APP_DOMAIN } = process.env
 class SocketioService {
     socket;
-    constructor() { }
+    constructor() {}
 
     setupSocketConnection() {
-        this.socket = io(URL, {
+        this.socket = io(VUE_APP_DOMAIN, {
+            path: '/sosocket',
             transports: ["websocket"],
             withCredentials: true,
             extraHeaders: {

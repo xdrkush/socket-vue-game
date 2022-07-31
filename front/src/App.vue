@@ -190,7 +190,7 @@ button {
 input {
   height: 27px;
   border: solid 2px var(--color-dark);
-  border-radius: 15px;
+  border-radius: var(--radius);
 }
 
 .register {
