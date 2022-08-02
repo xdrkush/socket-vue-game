@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "dev": "yarn serve",
+    "dev": "yarn serve --mode developpement",
     "build": "vue-cli-service build",
     "prod": "yarn build && yarn back",
     "lint": "vue-cli-service lint"

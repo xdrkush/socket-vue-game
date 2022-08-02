@@ -1,43 +1,21 @@
 <template>
   <div>
     <!-- Navbar -->
-    <nav
-      style="
-        display: flex;
-        color: #000;
-        height: 7vh;
-        justify-content: space-between;
-        background-color: darkslategrey;
-        align-items: center;
-        border-bottom: solid 1px lightgreen;
-        box-shadow: 0 0 10px;
-        margin-bottom: 5px;
-      "
-    >
-      <h1 style="margin-left: 20px">
-        <router-link to="/">Kush-Land</router-link>
-      </h1>
+    <nav class="navbar bg-dark txt-light">
+      <div class="justify_between w-100">
+        <h1 class="px-1">
+          <router-link to="/">🎉 Kush-Land</router-link>
+        </h1>
 
-      <!-- <div v-if="!store.getCurrentPlayer.auth">
-        <button
-          style="
-            background-color: lightseagreen;
-            color: white;
-            margin-right: 15px;
-            padding: 7px;
-            border-radius: 15px;
-            border: solid 1px darkslategrey;
-            box-shadow: 0 0 3px black;
-            text-shadow: 0 0 5px black;
-          "
-          @click="connect()"
-        >
-          me connecter
-        </button>
-      </div> -->
+        <div v-if="!store.getCurrentPlayer.auth">
+          <h2 class="pr-3">@{{ store.getCurrentPlayer.username }}</h2>
+        </div>
+      </div>
     </nav>
 
-    <p>currentUser: {{ store.getCurrentPlayer }}</p>
+    <div style="margin-top: 7vh"></div>
+
+    <!-- <p>currentUser: {{ store.getCurrentPlayer }}</p> -->
     <!-- <p>currentRoom: {{ store.getCurrentRoom }}</p> -->
     <!-- <p>sessions: {{ store.getSessions }}</p> -->
     <!-- <p>rooms: {{ store.getRooms }}</p> -->

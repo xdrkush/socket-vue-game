@@ -8,7 +8,7 @@ export default class SocketInstance {
         this.messages = []
         this.rooms = []
         this.sessions = []
-        // this.chat = new ChatInstance()
+        this.games = [{ name: 'puissance-4', path: 'p4' }, { name: 'dice-game', path: 'dg' }]
     }
 
     runSocket() {
@@ -31,7 +31,7 @@ export default class SocketInstance {
             if (!username) {
                 return next(new Error("invalid username"));
             }
-            console.log('handshake', socket.handshake)
+            // console.log('handshake', socket.handshake)
             socket.sessionID = randomId();
             socket.userID = randomId();
             socket.username = username;
@@ -55,7 +55,6 @@ export default class SocketInstance {
             socket.join(socket.sessionID)
 
             // sync
-            // this.users = [...this.users, { id: socket.id, name: "anonymous" }]
             this.io.emit('userConnected', {
                 session: {
                     sessionID: socket.sessionID,
@@ -69,14 +68,14 @@ export default class SocketInstance {
             // socket.on("login", function (userdata) {
             //     socket.handshake.session.userdata = userdata;
             //     socket.handshake.session.save();
-                // console.log('session on')
+            // console.log('session on')
             // });
 
             // socket.on("logout", function (userdata) {
             //     if (socket.handshake.session.userdata) {
             //         delete socket.handshake.session.userdata;
             //         socket.handshake.session.save();
-                    // console.log('session off')
+            // console.log('session off')
             //     }
             // });
 
@@ -84,54 +83,32 @@ export default class SocketInstance {
             socket.emit('getSync', {
                 messages: this.messages,
                 rooms: this.rooms,
-                sessions: this.sessions
+                sessions: this.sessions,
+                games: this.games
             })
 
             socket.on('getSyncRoom', (data) => {
                 socket.join(`${data.room}`)
-                let room = this.rooms.find(r => {
-                    if (r.name === data.room) return true
-                })
-                // console.log('getSyncRoom', room, data)
+                // console.log('getSyncRoom', data, this.rooms)
+                let room = this.getRoomByName(data.room)
 
-                let userExist = room.users.find((user) => {
-                    if (user.sessionID === data.user.sessionID) return true
-                })
-                if (!userExist) {
-                    // console.log('getSyncRoom, !userexist')
-                    room.users = [...room.users, data.user]
-                }
+                this.addUserToRoom(data.user, room)
 
-                this.rooms = [...this.rooms.map((r) => {
-                    // console.log('loop', r.name)
-                    if (r.name === data.room) {
-                        // console.log('match room')
-                        r.users = room.users;
-                        r.players = room.players;
-                        return room
-                    } else return r
-                })]
-
-                this.io.emit("syncRooms", { rooms: this.rooms })
+                this.io.emit("syncRooms", { rooms: this.getRooms() })
                 this.io.to(`${room.name}`).emit('syncRoom', {
                     room
                 })
                 this.io.to(`${room.name}`).emit('flash', {
                     message: "Un visiteurs venu d'ailleurs, "
                 })
+
+                // console.log('getSyncRoom !', this.getRooms())
             })
 
             socket.on('editProfile', (data) => {
-                // console.log('editProfile', data, this.users)
-                this.sessions = [...this.sessions.map((sess, index) => {
-                    // console.log('loop', sess, data)
-                    if (sess.sessionID === data.sessionID) {
-                        // console.log('match')
-                        sess.username = data.username;
-                        return sess
-                    } else return sess
-                })]
-                this.io.emit('syncEditProfile', { user: data, sessions: this.sessions })
+                this.setSession(data)
+                socket.username = data.username
+                this.io.emit('syncEditProfile', { user: data, sessions: this.getSessions() })
                 this.io.emit('flash', {
                     message: `$${data.username} à éditer son profil`
                 })
@@ -158,28 +135,13 @@ export default class SocketInstance {
             });
 
             socket.on('selectPlayer', (data) => {
-                const user = this.sessions.find(u => {
-                    if (u.sessionID === data.choosePlayer) return true;
-                })
-                // console.log('user selected', data, user)
+                const user = this.getSessionBySessionID(data.choosePlayer)
 
-                this.rooms = this.rooms.map(r => {
-                    if (r.name === data.room.name) return {
-                        ...r,
-                        players: [r.players[0], user]
-                    }
-                })
+                this.addPlayerToRoom(user, data.room)
 
-                const room = this.rooms.find(r => {
-                    // console.log('FIND::', r, data.room.name)
-                    if (String(r.name) === String(data.room.name)) return true;
-                })
-
-                // console.log('SEND SELECTPLAYER', this.rooms, room)
-
-                this.io.emit('syncRooms', { rooms: this.rooms })
+                this.io.emit('syncRooms', { rooms: this.getRooms() })
                 this.io.to(`${data.room.name}`).emit('syncRoom', {
-                    room
+                    room: this.getRoomByName(data.room.name)
                 })
                 this.io.to(`${data.room.name}`).emit('flash', {
                     message: user.username + " est le player 2 !"
@@ -187,28 +149,12 @@ export default class SocketInstance {
             });
 
             socket.on('createGame', (data) => {
-                // console.log('createGame', data)
-                const room = {
-                    name: `${data.game}/${data.author.userID}/${data.author.username}`,
-                    author: data.author,
-                    status: data.game,
-                    limitPlayers: 2,
-                    users: [data.author],
-                    players: [data.author],
-                    isPrivate: false,
-                    data: {},
-                    chat: {
-                        messages: []
-                    }
-                }
-
-                socket.join(`${room.name}`)
-                // this.setRooms(room)
-                this.rooms = [...this.rooms, room]
-                this.setRooms(this.rooms)
-                this.io.emit('newRoom', { room, rooms: this.rooms })
-                this.io.to(`${room.name}`).emit('createGame', {
-                    room, rooms: this.rooms
+                console.log('createGame', data)
+                socket.join(`${data.room.name}`)
+                const rooms = this.createRoom(data.room)
+                this.io.emit('newRoom', { rooms })
+                socket.emit('createGame', {
+                    room: data.room
                 })
                 this.io.emit('flash', {
                     message: "Nouvelle partie créé 🎉 !",
@@ -216,17 +162,9 @@ export default class SocketInstance {
             });
 
             socket.on('startGame', (data) => {
-                // console.log('startGame', data)
-                this.rooms = [...this.rooms.map((room, index) => {
-                    if (room.name === data.name) return { ...room, ...data }
-                    else return
-                })]
+                const room = this.setRoom(data)
 
-                const room = this.getRoomByName(data.name)
-
-                // console.log('startGame', room, this.rooms)
-
-                this.io.emit("syncRooms", { rooms: this.rooms })
+                this.io.emit("syncRooms", { rooms: this.getRooms })
                 this.io.to(`${data.name}`).emit('syncRoom', {
                     room,
                 })
@@ -248,11 +186,11 @@ export default class SocketInstance {
             })
 
             socket.on('stop', (data) => {
-                // console.log('stop', data)
+                // console.log("stop", data)
                 const rooms = this.deleteRoom(data)
 
                 this.io.to(`${data.name}`).emit('stop', {
-                    room: {}, rooms: this.rooms
+                    room: {}, rooms
                 })
                 this.io.to(`${data.name}`).emit('flash', {
                     message: "l'hote à quitter !",
@@ -261,13 +199,12 @@ export default class SocketInstance {
 
             socket.on('action', (data) => {
                 const room = this.setRoom(data)
-
                 this.io.emit('syncRoooms', { rooms: this.rooms })
                 this.io.to(`${data.name}`).emit('action', {
                     room
                 })
             })
-            
+
             socket.on('winner', (data) => {
                 console.log('WINNER::', data)
                 this.io.to(`${data.name}`).emit('flash', {
@@ -277,16 +214,21 @@ export default class SocketInstance {
 
             // Disconnected
             socket.on('disconnect', () => {
-                // this.rooms.map((r) => {
-                //     r.users.splice(r.users.indexOf({ sessionID: socket.sessionID }), 1)
-                //     r.players.splice(r.players.indexOf({ sessionID: socket.sessionID }), 1)
-                // })
-                this.users.splice(this.users.indexOf({ sessionID: socket.sessionID }), 1)
+                const roomsWithUser = this.getRoomsWithUser(socket.sessionID)
+                if (roomsWithUser.length > 0) {
+                    roomsWithUser.map(room => {
+                        room.users.map(u => {
+                            if (u.sessionID === socket.sessionID) {
+                                this.io.to(`${room.name}`).emit('syncRoom', { room: this.deleteUserToRoom(u, room) })
+                            }
+                        })
+                    })
+                }
+                this.deleteUser(socket.sessionID)
                 this.io.emit('userDisconnected', {
-                    user: { id: socket.id, name: socket.username },
-                    users: this.users,
-                    rooms: this.rooms
+                    rooms: this.getRooms()
                 })
+                this.io.emit('flash', { message: `${socket.username} c'est déconnecter !` })
             });
 
             // Error
@@ -298,39 +240,105 @@ export default class SocketInstance {
 
     }
 
-    getRoomByName(name) {
-        return this.rooms.find(r => {
-            if (r.name === name) return true;
+    // Sessions / Users
+    getSessions() {
+        return this.sessions
+    }
+    getSessionBySessionID(sessionID) {
+        return this.sessions.find(u => {
+            if (u.sessionID === sessionID) return true;
         })
     }
-    getSessionBySessionID() { }
+    deleteUser(sessionID) {
+        this.users.splice(this.users.indexOf({ sessionID }), 1)
+        this.rooms.map(room => {
+            room.users.map(u => {
+                if (u.sessionID === sessionID) this.deleteUserToRoom(u, room)
+            })
+            // room.players.map(u => {
+            //     if (u.sessionID === sessionID) this.deletePlayerToRoom(u, room)
+            // })
+        })
+        return this.users
+    }
+    setSession(user) {
+        this.sessions = this.sessions.map((u, i) => {
+            if (u.sessionID === user.sessionID) return { ...u, ...user }
+            else return u
+        })
+        return user
+    }
 
+    // Messages
     setMessages(message) {
         if (this.messages.length > 44) this.messages.shift()
         else this.messages = [...this.messages, message]
     }
 
+    // Rooms
+    getRooms() {
+        return this.rooms
+    }
+    getRoomsWithUser(sessionID) {
+        let arr = [];
+        this.rooms.map(room => {
+            let eee = room.users.find(u => {
+                if (u.sessionID === sessionID) return true
+            })
+            console.log('getRoomsWithUser::loop', room, eee)
+            if (eee) {
+                arr.push(room)
+            }
+        })
+        return arr
+    }
     setRooms(rooms) {
-        this.rooms = [...rooms]
+        this.rooms = rooms
         return this.rooms
     }
 
+    // Room
     createRoom(room) {
         this.rooms = [...this.rooms, room]
+        return this.rooms
     }
-
+    addUserToRoom(user, room) {
+        const isExist = room.users.find(u => {
+            if (u.sessionID === user.sessionID) return true
+        })
+        if (!isExist) room.users = [...room.users, user]
+        return this.setRoom(room)
+    }
+    deleteUserToRoom(user, room) {
+        room.users.splice(room.users.indexOf({ sessionID: user.sessionID }), 1)
+        return this.setRoom(room)
+    }
+    addPlayerToRoom(user, room) {
+        const isExist = room.players.find(u => {
+            if (u.sessionID === user.sessionID) return true
+        })
+        if (!isExist) room.players = [...room.players, user]
+        return this.setRoom(room)
+    }
+    deletePlayerToRoom(user, room) {
+        room.players.splice(room.players.indexOf({ sessionID: user.sessionID }), 1)
+        return this.setRoom(room)
+    }
+    getRoomByName(name) {
+        return this.rooms.find(r => {
+            if (r.name === name) return true;
+        })
+    }
     setRoom(room) {
         this.rooms = this.rooms.map((r, i) => {
-            if (r.name === room.name) return room
+            if (r.name === room.name) return { ...r, ...room }
             else return r
         })
         return room
     }
-
     deleteRoom(room) {
-        return this.rooms.map((r, index) => {
-            if (r.name === room.name) this.rooms.slice(0, index)
-        })
+        this.rooms.splice(this.rooms.indexOf({ name: room.name }), 1)
+        return this.rooms
     }
 
 }

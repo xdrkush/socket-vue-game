@@ -2,8 +2,6 @@ import { defineStore } from 'pinia'
 import S from "../boot/socket.io";
 import { notify } from "@kyvg/vue3-notification";
 
-// useStore could be anything like useUser, useCart
-// the first argument is a unique id of the store across your application
 export const useStore = defineStore("main", {
     state: () => ({
         flash: "",
@@ -11,7 +9,7 @@ export const useStore = defineStore("main", {
         currentPlayer: {},
         currentRoom: {},
         sessions: [],
-        games: [{ name: 'puissance-4', path: 'p4' }],
+        games: [],
         rooms: [],
         messages: []
     }),
@@ -49,10 +47,7 @@ export const useStore = defineStore("main", {
             // Load page
 
             S.socket.on("flash", (data) => {
-                this.flash = data.message;
-                notify({
-                    title: data.message
-                });
+                notify({ title: data.message });
             });
 
             S.socket.on("getSync", (data) => {
@@ -60,6 +55,7 @@ export const useStore = defineStore("main", {
                 this.messages = data.messages;
                 this.sessions = data.sessions;
                 this.rooms = data.rooms;
+                this.games = data.games;
             });
 
             S.socket.on("syncEditProfile", (data) => {
@@ -76,7 +72,6 @@ export const useStore = defineStore("main", {
 
             S.socket.on("createGame", (data) => {
                 console.log("createGame", this, data);
-                this.rooms = data.rooms;
                 this.currentRoom = data.room;
                 this.$router.push(`/game/${data.room.name}`);
             });
@@ -103,9 +98,6 @@ export const useStore = defineStore("main", {
                 this.rooms = data.rooms;
                 this.currentRoom = data.room;
                 this.$router.push('/')
-                notify({
-                    title: `${this.getCurrentRoom.author.username} à mis fin à la partie 🎉`,
-                });
             });
 
             // S.socket.on("joinRoom", (data) => {
@@ -120,16 +112,14 @@ export const useStore = defineStore("main", {
             });
 
             S.socket.on("userConnected", (data) => {
-                console.log("new userConnected:", data.session);
+                // console.log("new userConnected:", data.session);
                 this.sessions = data.sessions
                 notify(data.session.username + " viens de ce connecté !");
             });
 
             S.socket.on("userDisconnected", (data) => {
-                console.log("userDisconnected:", data);
                 this.users = data.users
                 this.rooms = data.rooms
-                notify(data.user.name + ": c'est déconnecter");
             });
         },
         getSyncMessage() {

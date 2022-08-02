@@ -1,11 +1,12 @@
 <template>
-  <div class="bg-dark txt-light" style="padding: 5px">
+  <div class="bg-dark txt-light bdr-primary">
     <!-- Chat -->
     <div
       v-if="store.getCurrentRoom.chat"
-      class="bdr-primary bg-dark"
+      class="bg-dark"
       style="
-        height: 60vh;
+        min-height: 40vh;
+        max-height: 60vh;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -60,7 +61,7 @@
         @submit="sendMessage"
         class="justify_between"
       >
-        <input type="text" style="width: 80%" v-model="text" />
+        <input type="text" style="width: 80%" v-model="text" placeholder="Écrivez votre message" />
         <button type="submit" style="width: 20%">Send</button>
       </form>
     </div>

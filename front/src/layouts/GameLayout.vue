@@ -1,26 +1,26 @@
 <template>
   <div>
     <!-- Navbar -->
-    <nav
-      style="
-        display: flex;
-        color: #000;
-        height: 7vh;
-        justify-content: space-between;
-        background-color: darkslategrey;
-        align-items: center;
-        border-bottom: solid 1px lightgreen;
-        box-shadow: 0 0 10px;
-        margin-bottom: 5px;
-      "
-    >
-      <h2 @click="() => copyToClipPart()" style="margin-left: 20px; color: white">
-        {{ store.getCurrentRoom.name }}
-      </h2>
+    <nav class="navbar bg-dark txt-light bdr-b-primary">
+      <div class="justify_between w-100">
+        <button tag="a" @click="() => copyToClipPart()">
+          <h3 class="px-1">
+            {{ store.getCurrentRoom.name }}
+          </h3>
+        </button>
+
+        <div v-if="!store.getCurrentPlayer.auth">
+          <h2 class="pr-3">@{{ store.getCurrentPlayer.username }}</h2>
+        </div>
+      </div>
     </nav>
 
+    <div style="margin-top: 12vh"></div>
+
+    <!-- Collapse / Menu -->
     <CurrentRoom />
 
+    <!-- Button fixed -->
     <Dashboard />
 
     <!-- Page (Body) -->

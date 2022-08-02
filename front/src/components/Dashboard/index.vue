@@ -1,6 +1,7 @@
 <template>
   <div
     style="
+      z-index: 9999;
       width: auto;
       position: fixed;
       padding: 3px;
@@ -83,56 +84,48 @@
           justify-content: space-around;
         "
       >
-        <p v-if="store.getGames.length > 0">Jeux disponible</p>
-        <div :key="game.name + index" v-for="(game, index) in store.games">
-          <router-link :to="`/${game.path}`">
-            <button>
-              {{ game.name }}
-            </button>
-          </router-link>
+        <div v-if="store.getGames.length > 0">
+          <p>Jeux disponible</p>
+          <div class="center">
+            <div :key="game.name + index" v-for="(game, index) in store.games">
+              <router-link :to="`/view/${game.path}`">
+                <button>
+                  {{ game.name }}
+                </button>
+              </router-link>
+            </div>
+          </div>
         </div>
-        <p v-if="store.getRooms.length > 0">Rejoindre une partie</p>
-        <div :key="index" v-for="(room, index) in store.rooms">
-          <router-link :to="`/game/${room.name}`">
-            <button v-if="room">
-              {{ room.status }} - {{ room.author.username }} : [
-              {{ room.players.length }} / {{ room.limitPlayers }} ] ::
-              {{ room.users.length }}
-            </button>
-          </router-link>
+        <div v-if="store.getRooms.length > 0">
+          <p>Rejoindre une partie</p>
+          <div :key="index" v-for="(room, index) in store.rooms">
+            <router-link :to="`/game/${room.name}`">
+              <button v-if="room">
+                {{ room.status }} - {{ room.author.username }} : [
+                {{ room.players.length }} / {{ room.limitPlayers }} ] ::
+                {{ room.users.length }}
+              </button>
+            </router-link>
+          </div>
         </div>
-        <!-- <p>Jouer à</p>
-        <select v-model="game" placeholder="Choisir un jeux">
-          <option :key="game" v-for="game in store.getGames">
-            {{ game.name }}
-          </option>
-        </select>
-        <p>Avec</p>
-        <select v-if="store.users" v-model="user" placeholder="Users en ligne">
-          <option :key="user" v-for="user in store.getUsers" :value="user">
-            {{ user }}
-          </option>
-        </select>
-        <button type="submit">inviter</button> -->
       </form>
     </div>
 
     <!-- Chat -->
     <div
       v-if="chat && dashboard"
+      class="bg-dark"
       style="
-        border: solid 1px lightgreen;
         height: 40vh;
         min-width: 320px;
-        padding: 5px 5px;
-        background-color: darkslategrey;
+        max-width: 370px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
       "
     >
       <!-- Message -->
-      <div style="overflow: auto">
+      <div style="overflow: auto" class="px-1">
         <div :key="index" v-for="(m, index) in store.messages">
           <div
             :style="`
@@ -189,8 +182,8 @@
           box-shadow: 0 0 10px;
         "
       >
-        <input type="text" style="width: 80%" v-model="text" />
-        <button type="submit" style="width: 20%">Send</button>
+        <input type="text" style="width: 80%" v-model="text"  placeholder="Écrivez votre message" />
+        <button type="submit" style="width: 20%"><strong>Send</strong></button>
       </form>
     </div>
 
@@ -204,9 +197,9 @@
       "
     >
       <!-- Switch chat or account -->
-      <button v-if="dashboard" @click="chat = !chat">Chat</button>
-      <button v-if="dashboard" @click="account = !account">Account</button>
-      <button v-if="dashboard" @click="game = !game">Games</button>
+      <button v-if="dashboard" @click="chat = !chat"><strong>Chat</strong></button>
+      <button v-if="dashboard" @click="account = !account"><strong>Account</strong></button>
+      <button v-if="dashboard" @click="game = !game"><strong>Games</strong></button>
 
       <button
         v-if="!dashboard"
@@ -228,10 +221,11 @@
           text-shadow: 0 0 5px black;
         "
       >
-        Dashboard
+        <strong>Dashboard</strong>
       </button>
       <button
         v-else
+        class="bg-accent txt-light"
         @click="
           () => {
             chat = !chat;
@@ -241,7 +235,7 @@
           }
         "
       >
-        Réduire
+        <strong>Réduire</strong>
       </button>
     </div>
 
