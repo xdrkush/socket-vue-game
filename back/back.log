@@ -1,0 +1,75 @@
+yarn run v1.22.19
+$ nodemon .
+[33m[nodemon] 2.0.15[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,json[39m
+[32m[nodemon] starting `node .`[39m
+BACK :: [SOCKET.IO] run on : 22777
+getRoomsWithUser::loop {
+  name: 'p4/6156ff63619b5291/tbio',
+  author: {
+    sessionID: '5207a47d4a17a221',
+    userID: '6156ff63619b5291',
+    username: 'tbio'
+  },
+  status: 'p4',
+  limitPlayers: 2,
+  users: [
+    {
+      sessionID: '5207a47d4a17a221',
+      userID: '6156ff63619b5291',
+      username: 'tbio'
+    }
+  ],
+  players: [
+    {
+      sessionID: '5207a47d4a17a221',
+      userID: '6156ff63619b5291',
+      username: 'tbio',
+      points: 0
+    }
+  ],
+  message: 'Nouvelle partie',
+  isPrivate: false,
+  gameOver: false,
+  data: {},
+  chat: { messages: [] }
+} undefined
+getRoomsWithUser::loop {
+  name: 'p4/6156ff63619b5291/tbio',
+  author: {
+    sessionID: '5207a47d4a17a221',
+    userID: '6156ff63619b5291',
+    username: 'tbio'
+  },
+  status: 'p4',
+  limitPlayers: 2,
+  users: [
+    {
+      sessionID: '5207a47d4a17a221',
+      userID: '6156ff63619b5291',
+      username: 'tbio'
+    }
+  ],
+  players: [
+    {
+      sessionID: '5207a47d4a17a221',
+      userID: '6156ff63619b5291',
+      username: 'tbio',
+      points: 0
+    }
+  ],
+  message: 'Nouvelle partie',
+  isPrivate: false,
+  gameOver: false,
+  data: {},
+  chat: { messages: [] }
+} {
+  sessionID: '5207a47d4a17a221',
+  userID: '6156ff63619b5291',
+  username: 'tbio'
+}
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node .`[39m
+BACK :: [SOCKET.IO] run on : 22777

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import S from "../boot/socket.io";
 import { notify } from "@kyvg/vue3-notification";
+import JSConfetti from "js-confetti";
 
 export const useStore = defineStore("main", {
     state: () => ({
@@ -8,6 +9,7 @@ export const useStore = defineStore("main", {
         loggedIn: false,
         currentPlayer: {},
         currentRoom: {},
+        users: [],
         sessions: [],
         games: [],
         rooms: [],
@@ -20,6 +22,7 @@ export const useStore = defineStore("main", {
         getCurrentRoom: (state) => state.currentRoom,
         getLoggedIn: (state) => state.loggedIn,
         getSessions: (state) => state.sessions,
+        getUsers: (state) => state.users,
         getGames: (state) => state.games,
         getRooms: (state) => state.rooms,
         getMessages: (state) => state.messages
@@ -39,41 +42,52 @@ export const useStore = defineStore("main", {
                 if (userID && sessionID && username) {
                     this.loggedIn = true
                     this.currentPlayer = { sessionID, userID, username }
-                    this.sessions = data.sessions
                 }
             });
         },
         getSync() {
             // Load page
-
             S.socket.on("flash", (data) => {
                 notify({ title: data.message });
             });
 
+            S.socket.on("winner", (data) => {
+                console.log('WINNER')
+                this.currentRoom = data.room;
+                new JSConfetti().addConfetti();
+            });
+
             S.socket.on("getSync", (data) => {
                 console.log('getSync', data)
-                this.messages = data.messages;
+                this.users = data.users;
                 this.sessions = data.sessions;
-                this.rooms = data.rooms;
                 this.games = data.games;
+                this.rooms = data.rooms;
+                this.messages = data.messages;
             });
 
             S.socket.on("syncEditProfile", (data) => {
+                this.users = data.users;
                 this.sessions = data.sessions;
             });
+            S.socket.on("syncCurrentPlayer", (data) => {
+                this.currentPlayer = data.user;
+            });
             S.socket.on("syncRooms", (data) => {
-                console.log('syncRooms', data)
+                // console.log('syncRooms', data)
                 this.rooms = data.rooms;
             });
             S.socket.on("syncRoom", (data) => {
-                console.log('syncRoom', data)
+                // console.log('syncRoom', data)
                 this.currentRoom = data.room;
+                new JSConfetti().addConfetti();
             });
 
             S.socket.on("createGame", (data) => {
                 console.log("createGame", this, data);
                 this.currentRoom = data.room;
                 this.$router.push(`/game/${data.room.name}`);
+                new JSConfetti().addConfetti();
             });
 
             S.socket.on("startGame", (data) => {
@@ -83,7 +97,6 @@ export const useStore = defineStore("main", {
 
             S.socket.on("action", (data) => {
                 console.log("action", data);
-                this.rooms = data.rooms;
                 this.currentRoom = data.room;
             });
 
@@ -91,6 +104,7 @@ export const useStore = defineStore("main", {
                 console.log("refresh", data);
                 this.rooms = data.rooms;
                 this.currentRoom = data.room;
+                new JSConfetti().addConfetti();
             });
 
             S.socket.on("stop", (data) => {
@@ -100,25 +114,46 @@ export const useStore = defineStore("main", {
                 this.$router.push('/')
             });
 
-            // S.socket.on("joinRoom", (data) => {
-            //     console.log("joinRoom", data);
-            //     this.currentRoom = data.room;
-            //     // this.$router.push(`/game/${data.room.name}`)
-            // });
-
             S.socket.on("newRoom", (data) => {
                 console.log("newRoom", data);
                 this.rooms = data.rooms;
             });
 
             S.socket.on("userConnected", (data) => {
-                // console.log("new userConnected:", data.session);
-                this.sessions = data.sessions
+                console.log("new userConnected:", data);
                 notify(data.session.username + " viens de ce connecté !");
+                this.users = data.users;
+                this.sessions = data.sessions;
+
+                // <3
+                if (data.session.username.includes('kush'))
+                    new JSConfetti().addConfetti({
+                        emojis: ["🦄", "🤯", "🐧"],
+                        emojiSize: 40,
+                        confettiNumber: 10,
+                        confettiRadius: 6,
+                    })
+                else if (data.session.username.includes('tbio'))
+                    new JSConfetti().addConfetti({
+                        emojis: ["🌿", "🍀", "🌱"],
+                        emojiSize: 30,
+                        confettiNumber: 10,
+                        confettiRadius: 6,
+                    })
+                else new JSConfetti().addConfetti({
+                    emojis: ["🎉", "🥳", "✨"],
+                    emojiSize: 30,
+                    confettiNumber: 10,
+                    confettiRadius: 6,
+                });
+                new JSConfetti().addConfetti();
+
             });
 
             S.socket.on("userDisconnected", (data) => {
+                console.log("userDisconnected:", data);
                 this.users = data.users
+                this.sessions = data.sessions
                 this.rooms = data.rooms
             });
         },

@@ -15,7 +15,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
-    "party-js": "^2.2.0",
+    "js-confetti": "^0.10.2",
     "pinia": "^2.0.16",
     "sass-loader": "^13.0.2",
     "socket.io": "^4.5.1",

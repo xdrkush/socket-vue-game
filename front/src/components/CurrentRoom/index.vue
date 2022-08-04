@@ -11,7 +11,7 @@
           By: <strong>@</strong>{{ store.getCurrentRoom.author.username }}
         </p>
         <p>
-          Players:
+          P:
           <span
             :class="
               store.getCurrentRoom.players.length >=
@@ -21,10 +21,13 @@
             "
             >{{ store.getCurrentRoom.players.length }}</span
           >
-          / {{ store.getCurrentRoom.limitPlayers }}
+          / <strong>{{ store.getCurrentRoom.limitPlayers }}</strong>
         </p>
-        <p>Visitors: {{ store.getCurrentRoom.users.length }}</p>
-        <button class="bg-accent"><strong>+ INFO</strong></button>
+        <p>
+          Visitors: <strong>{{ store.getCurrentRoom.users.length }}</strong>
+        </p>
+        <button v-if="!info" class="bg-accent"><strong>info ?</strong></button>
+        <button v-else class="bg-warning"><strong>Fermer X</strong></button>
       </div>
 
       <!-- Wrapper / Collapse body -->
@@ -94,6 +97,14 @@
               </li>
             </ul>
           </div>
+
+          <button
+            v-if="isAuthor()"
+            @click="() => stopGame()"
+            class="bg-negative"
+          >
+            <strong>Cloturer la room !</strong>
+          </button>
         </div>
 
         <div class="w-100">
@@ -109,6 +120,7 @@ import { ref } from "vue";
 import { useStore } from "../../stores/global.store";
 import S from "../../boot/socket.io";
 import ChatRoom from "../ChatRoom/index.vue";
+import { useRouter } from "vue-router";
 
 export default {
   name: "Home",
@@ -117,6 +129,8 @@ export default {
     const store = useStore();
     const choosePlayer = ref("");
     const info = ref(false);
+    const router = useRouter();
+
     return {
       store,
       choosePlayer,
@@ -127,6 +141,20 @@ export default {
           choosePlayer: id,
           room,
         });
+      },
+      // Author (client)
+      isAuthor() {
+        return store.getCurrentRoom.author.sessionID ===
+          store.getCurrentPlayer.sessionID
+          ? true
+          : false;
+      },
+      stopGame() {
+        S.socket.emit("stop", {
+          ...store.getCurrentRoom,
+          message: "Room fermé !",
+        });
+        router.push("/" + store.getCurrentRoom.status);
       },
     };
   },

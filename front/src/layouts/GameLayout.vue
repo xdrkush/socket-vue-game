@@ -27,6 +27,7 @@
     <div>
       <router-view />
     </div>
+
   </div>
 </template>
 
@@ -57,7 +58,11 @@ export default defineComponent({
     );
     // store.loadRoom(router.fullPath);
 
-    if (!store.getLoggedIn) router.push("/");
+    let roomExist = store.getRooms.find(r => {
+      if (r.name === `${route.params.game}/${route.params.id}/${route.params.name}`) return true
+    });
+
+    if (!store.getLoggedIn || !roomExist) router.push("/");
     else
       S.socket.emit("getSyncRoom", {
         user: store.getCurrentPlayer,

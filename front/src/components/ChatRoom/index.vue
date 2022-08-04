@@ -57,15 +57,30 @@
       </div>
 
       <!-- Input -->
-      <form
-        @submit="sendMessage"
-        class="justify_between"
-      >
-        <input type="text" style="width: 80%" v-model="text" placeholder="Écrivez votre message" />
-        <button type="submit" style="width: 20%">Send</button>
+      <form @submit="sendMessage" class="col" style="box-shadow: 0 0 10px">
+
+        <div v-if="collapseEmoji" class="w-100 center wrap bdr-t-primary">
+          <span :key="emoji" v-for="emoji in listEmoji" class="pa-1" @click="() => text += emoji">{{ emoji }}</span>
+        </div>
+        
+        <div class="w-100 justify_around">
+          <button @click="() => (collapseEmoji = !collapseEmoji)">🥳</button>
+          <input
+            type="text"
+            v-model="text"
+            placeholder="Écrivez votre message"
+            class="w-100"
+          />
+          <button type="submit" style="width: 20%">
+            <strong>Send</strong>
+          </button>
+        </div>
       </form>
+
     </div>
+
     <div v-else>Aucun chat</div>
+
   </div>
 </template>
 
@@ -73,6 +88,7 @@
 import { ref } from "vue";
 import { useStore } from "../../stores/global.store";
 import S from "../../boot/socket.io";
+import { emoji } from "../../assets/utils"
 
 export default {
   name: "Home",
@@ -81,12 +97,16 @@ export default {
     const choosePlayer = ref("");
     const info = ref(false);
     const text = ref("");
+    const collapseEmoji = ref(false);
+    const listEmoji = ref([...emoji])
 
     return {
       store,
       choosePlayer,
       info,
       text,
+      collapseEmoji,
+      listEmoji,
       sendMessage(e) {
         e.preventDefault();
         console.log("sendMessageRoom", store.getCurrentPlayer, text.value);

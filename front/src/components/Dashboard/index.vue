@@ -117,8 +117,7 @@
       class="bg-dark"
       style="
         height: 40vh;
-        min-width: 320px;
-        max-width: 370px;
+        width: 370px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -173,34 +172,59 @@
       </div>
 
       <!-- Input -->
-      <form
-        @submit="sendMessage"
-        style="
-          display: flex;
-          justify-content: space-between;
-          padding: 5px;
-          box-shadow: 0 0 10px;
-        "
-      >
-        <input type="text" style="width: 80%" v-model="text"  placeholder="Écrivez votre message" />
-        <button type="submit" style="width: 20%"><strong>Send</strong></button>
+      <form @submit="sendMessage" class="col" style="box-shadow: 0 0 10px">
+        <div class="w-100">
+          <div
+            v-if="collapseEmoji"
+            style="height: 150px; width: 370px; overflow: auto"
+          >
+            <div class="w-100 wrap">
+              <span
+                :key="emoji"
+                v-for="emoji in listEmoji"
+                class="pa-1"
+                @click="() => (text += emoji)"
+                >{{ emoji }}</span
+              >
+            </div>
+          </div>
+          <div class="center w-100">
+            <button @click="() => (collapseEmoji = !collapseEmoji)">🥳</button>
+            <input
+              type="text"
+              v-model="text"
+              placeholder="Écrivez votre message"
+              class="w-100"
+            />
+            <button type="submit" style="width: 20%">
+              <strong>Send</strong>
+            </button>
+          </div>
+        </div>
       </form>
     </div>
 
     <!-- Button bottom -->
-    <div
-      style="
-        display: flex;
-        padding: 3px;
-        justify-content: space-between;
-        background-color: darkslategrey;
-      "
-    >
+    <div class="justify_between">
       <!-- Switch chat or account -->
-      <button v-if="dashboard" @click="chat = !chat"><strong>Chat</strong></button>
-      <button v-if="dashboard" @click="account = !account"><strong>Account</strong></button>
-      <button v-if="dashboard" @click="game = !game"><strong>Games</strong></button>
+      <button v-if="dashboard" @click="chat = !chat">
+        <strong>Chat</strong>
+      </button>
+      <button v-if="dashboard" @click="account = !account">
+        <strong>Account</strong>
+      </button>
+      <button v-if="dashboard" @click="game = !game">
+        <strong>Games</strong>
+      </button>
 
+      <!-- Button Home -->
+      <router-link v-if="!dashboard" to="/">
+        <button class="bg-accent">
+          <strong>Home</strong>
+        </button>
+      </router-link>
+
+      <!-- Button DashBoard -->
       <button
         v-if="!dashboard"
         @click="
@@ -211,18 +235,10 @@
             game = !game;
           }
         "
-        style="
-          background-color: lightseagreen;
-          color: white;
-          padding: 7px;
-          border-radius: 15px;
-          border: solid 1px darkslategrey;
-          box-shadow: 0 0 3px black;
-          text-shadow: 0 0 5px black;
-        "
       >
         <strong>Dashboard</strong>
       </button>
+      <!-- Button reduire -->
       <button
         v-else
         class="bg-accent txt-light"
@@ -258,6 +274,7 @@ import { ref } from "vue";
 import S from "../../boot/socket.io";
 import { useStore } from "../../stores/global.store";
 // import { useRouter } from "vue-router";
+import { emoji } from "../../assets/utils"
 
 export default {
   name: "Chat",
@@ -271,7 +288,9 @@ export default {
     const editName = ref(false);
     const text = ref("");
     const user = ref({ ...store.getCurrentPlayer });
+    const collapseEmoji = ref(false);
     const oldUser = { ...store.getCurrentPlayer };
+    const listEmoji = ref([...emoji]);
 
     return {
       store,
@@ -283,6 +302,8 @@ export default {
       editName,
       account,
       text,
+      collapseEmoji,
+      listEmoji,
       sendMessage(e) {
         e.preventDefault();
         console.log("sendMessage", store.getCurrentPlayer, text.value);
@@ -295,10 +316,6 @@ export default {
         });
         text.value = "";
       },
-      // joinRoom(room) {
-      //   console.log("joinRoom", room);
-      //   S.socket.emit("joinRoom", { user: store.getCurrentPlayer, room });
-      // },
       toggleChat() {
         if (!chat.value) chat.value = true;
         else chat.value = false;

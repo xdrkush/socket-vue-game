@@ -164,7 +164,7 @@ import { useStore } from "../../stores/global.store";
 import Socket from "../../boot/socket.io";
 import { useRouter, useRoute } from "vue-router";
 import { notify } from "@kyvg/vue3-notification";
-// import party from "party-js";
+// import JSConfetti from 'js-confetti'
 
 const rows = 6;
 const cols = 7;
@@ -267,7 +267,7 @@ export default {
             console.log(
               `Le joueurs ${store.getCurrentRoom.data.currentPlayer} à gagner`
             );
-            Socket.socket.emit("winner", {
+            Socket.socket.emit("flash", {
               message: `Le joueurs ${store.getCurrentRoom.data.currentPlayer} à gagner 🎉 !`,
             });
             store.getCurrentRoom.data.players[

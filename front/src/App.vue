@@ -24,10 +24,6 @@ export default {
     const usernameAlreadySelected = ref(false);
     const store = useStore();
 
-    store.getSession();
-    store.getSync();
-    store.getSyncMessage();
-
     // console.log("APPPP", ls_sessionID, store.loggedIn);
 
     watch(
@@ -43,6 +39,10 @@ export default {
       S.socket.auth = { sessionID: ls_sessionID };
       S.socket.connect();
     }
+
+    store.getSession();
+    store.getSync();
+    store.getSyncMessage();
 
     return {
       username,
@@ -101,6 +101,7 @@ h6 {
   padding: 0;
 }
 
+/* Text-color */
 .txt-primary {
   color: var(--color-primary);
 }
@@ -126,6 +127,7 @@ h6 {
   color: var(--color-warning);
 }
 
+/* Background */
 .bg-primary {
   background-color: var(--color-primary);
 }
@@ -151,6 +153,7 @@ h6 {
   background-color: var(--color-warning);
 }
 
+/* Borders */
 .bdr-primary {
   border: solid 2px var(--color-primary);
   border-radius: var(--radius);
@@ -183,14 +186,28 @@ h6 {
   border: solid 2px var(--color-warning);
   border-radius: var(--radius);
 }
-
 .bdr-b-primary {
   border-bottom: solid 1px var(--color-primary);
 }
-.bdr-bt-primary {
+.bdr-t-primary {
   border-top: solid 1px var(--color-primary);
 }
+.bdr-bt-primary {
+  border-bottom: solid 1px var(--color-primary);
+  border-top: solid 1px var(--color-primary);
+}
+.bdr-r-primary {
+  border-right: solid 1px var(--color-primary);
+}
+.bdr-l-primary {
+  border-left: solid 1px var(--color-primary);
+}
+.bdr-lr-primary {
+  border-left: solid 1px var(--color-primary);
+  border-right: solid 1px var(--color-primary);
+}
 
+/* Margin / Padding */
 /* Je sais que je peux le faire avec sass mais sass-loader n'est pas encore installer */
 .ma-1 {
   margin: 10px;
@@ -380,6 +397,10 @@ input {
   align-items: center;
   justify-content: center;
 }
+.wrap {
+  display: flex;
+  flex-wrap: wrap; 
+}
 .justify_between {
   display: flex;
   align-items: center;
@@ -405,6 +426,7 @@ input {
   display: flex;
   align-items: center;
 }
+.w-auto { width: auto; }
 .w-100 {
   width: 100%;
 }
@@ -429,7 +451,7 @@ input {
 /* Item */
 .navbar {
   z-index: 10;
-  min-height: 5vh;
+  height: 45px;
   width: 100vw;
   position: fixed;
   top: 0;
@@ -443,7 +465,7 @@ input {
   z-index: 10;
   width: 100vw;
   position: fixed;
-  top: calc(5vh + 1px);
+  top: calc(45px + 1px);
   box-shadow: var(--color-dark) 0 0 7px;
 }
 .box {

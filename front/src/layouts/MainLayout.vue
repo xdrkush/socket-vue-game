@@ -4,7 +4,7 @@
     <nav class="navbar bg-dark txt-light">
       <div class="justify_between w-100">
         <h1 class="px-1">
-          <router-link to="/">🎉 Kush-Land</router-link>
+          <router-link to="/">🎉 H-Land</router-link>
         </h1>
 
         <div v-if="!store.getCurrentPlayer.auth">
@@ -27,6 +27,9 @@
     <div>
       <router-view />
     </div>
+    
+    <div style="margin-top: 12vh"></div>
+
   </div>
 </template>
 
