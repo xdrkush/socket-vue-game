@@ -117,7 +117,8 @@
       class="bg-dark"
       style="
         height: 40vh;
-        width: 370px;
+        width: 320px;
+        max-width: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;

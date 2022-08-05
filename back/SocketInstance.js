@@ -260,7 +260,7 @@ export default class SocketInstance {
         })
         this.rooms.map(room => {
             room.users.map(u => {
-                if (u.userID === userID) this.deleteUserToRoom(u, room)
+                if (u.sessionID === sessionID) this.deleteUserToRoom(u, room)
             })
             // room.players.map(u => {
             //     if (u.sessionID === sessionID) this.deletePlayerToRoom(u, room)

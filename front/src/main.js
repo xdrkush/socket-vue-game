@@ -13,13 +13,16 @@ const app = createApp(App)
 
 const socket = SocketioService.setupSocketConnection();
 
-pinia.use(({store}) => {
+pinia.use(({ store }) => {
     store.$router = markRaw(router)
+    // store.$worker = worker
 })
 
 // console.log('main', socket)
 
+
 app
+    // .use(worker)
     .use(router)
     .use(pinia)
     .use(socket)

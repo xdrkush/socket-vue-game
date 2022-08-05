@@ -3,6 +3,7 @@ import S from "../boot/socket.io";
 import { notify } from "@kyvg/vue3-notification";
 import JSConfetti from "js-confetti";
 
+
 export const useStore = defineStore("main", {
     state: () => ({
         flash: "",
@@ -49,6 +50,11 @@ export const useStore = defineStore("main", {
             // Load page
             S.socket.on("flash", (data) => {
                 notify({ title: data.message });
+
+                if (Notification.permission !== "granted") Notification.requestPermission();
+                else {
+                    new Notification("H-land - Games", { body: data.message });
+                }
             });
 
             S.socket.on("winner", (data) => {
@@ -124,7 +130,21 @@ export const useStore = defineStore("main", {
                 notify(data.session.username + " viens de ce connecté !");
                 this.users = data.users;
                 this.sessions = data.sessions;
+                
+                // new Notification("H-land - Games", { body: data.session.username + " viens de ce connecté !" });
+                // Notification.requestPermission(function (permission) {
+                //     // If the user accepts, let's create a notification
+                //     if (permission === "granted") {
+                //         console.log('IXCICICCICI', worker)
+                //         worker.port.postMessage({ name: "notification" });
+                //     }
+                // });
 
+                if (Notification.permission !== "granted") Notification.requestPermission();
+                else {
+                    new Notification("H-land - Games", { body: data.session.username + " viens de ce connecté !" });
+                }
+                
                 // <3
                 if (data.session.username.includes('kush'))
                     new JSConfetti().addConfetti({
@@ -151,7 +171,6 @@ export const useStore = defineStore("main", {
             });
 
             S.socket.on("userDisconnected", (data) => {
-                console.log("userDisconnected:", data);
                 this.users = data.users
                 this.sessions = data.sessions
                 this.rooms = data.rooms

@@ -24,7 +24,32 @@ export default {
     const usernameAlreadySelected = ref(false);
     const store = useStore();
 
+    // Autorisation Notification on Browser
+    if (!Notification) {
+      alert(
+        "Desktop notifications not available in your browser. Try Chromium."
+      ); //if browser is not compatible this will occur
+      return;
+    }
+    if (Notification.permission !== "granted") Notification.requestPermission();
+    // if (Notification.permission !== "granted") Notification.requestPermission();
+    // else {
+    //   new Notification("CodeSpeedy (Notification Title)", {
+    //     icon: "https://cdn.codespeedy.com/wp-content/themes/codespeedy/img/CodeSpeedy-Logo.png",
+    //     body: "New Notification! Click to Check",
+    //   });
+    // }
     // console.log("APPPP", ls_sessionID, store.loggedIn);
+
+    // if (window.Worker) {
+    //   console.log("worker");
+    //   let worker = new Worker("./worker.js", { type: module });
+    //   worker.onmessage = function (msg) {
+    //     console.log("onmessage", msg);
+    //     // do something with messages sent back by worker
+    //   };
+    //   worker.postMessage({ name: "notifications" });
+    // }
 
     watch(
       () => store.getFlash,
@@ -399,7 +424,7 @@ input {
 }
 .wrap {
   display: flex;
-  flex-wrap: wrap; 
+  flex-wrap: wrap;
 }
 .justify_between {
   display: flex;
@@ -426,7 +451,9 @@ input {
   display: flex;
   align-items: center;
 }
-.w-auto { width: auto; }
+.w-auto {
+  width: auto;
+}
 .w-100 {
   width: 100%;
 }
